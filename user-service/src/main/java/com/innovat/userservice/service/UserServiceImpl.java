@@ -11,9 +11,14 @@ import javax.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.innovat.userservice.dto.CheckUser;
+import com.innovat.userservice.dto.DTOUser;
+import com.innovat.userservice.dto.DTOUserFactory;
 import com.innovat.userservice.model.User;
+import com.innovat.userservice.repository.AuthorityRepository;
 import com.innovat.userservice.repository.UserRepository;
 
 import lombok.extern.java.Log;
@@ -23,6 +28,12 @@ import lombok.extern.java.Log;
 public class UserServiceImpl implements UserService {	
      
      
+	@Autowired
+    private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+    private AuthorityRepository auth;
+	
     @Autowired
     private JavaMailSender mailSender;
     
@@ -35,8 +46,10 @@ public class UserServiceImpl implements UserService {
     	return repo.findByUsername(username);
     }
     
-    public void register(User user) throws UnsupportedEncodingException, MessagingException {
+    public void register(DTOUser dtouser,CheckUser userLogged) throws UnsupportedEncodingException, MessagingException {
     	log.info("=====================start register================");
+    	User user = DTOUserFactory.createUser(dtouser,userLogged.getUsername(),passwordEncoder,auth);
+    	user.setEnabled(false);
         repo.save(user);
         sendVerificationEmail(user);
     }
@@ -95,9 +108,9 @@ public class UserServiceImpl implements UserService {
 		return repo.existsById(id);
 	}
 
-	public boolean save(User user) {
+	public boolean save(DTOUser dtouser,CheckUser userLogged) {
 		// TODO Auto-generated method stub
-		
+		User user = DTOUserFactory.createUser(dtouser,userLogged.getUsername(),passwordEncoder,auth);
     	repo.save(user);
 		return repo.findByUsername(user.getUsername())!=null;
 	}

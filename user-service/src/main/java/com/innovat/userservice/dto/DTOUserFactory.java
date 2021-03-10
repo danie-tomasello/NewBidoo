@@ -9,17 +9,17 @@ import com.innovat.userservice.model.Authority;
 import com.innovat.userservice.model.User;
 import com.innovat.userservice.repository.AuthorityRepository;
 
-import lombok.extern.java.Log;
 import net.bytebuddy.utility.RandomString;
 
-@Log
 public class DTOUserFactory {
 	
 	
 	
-	public static User createUser(DTOUser dtouser,PasswordEncoder passwordEncoder,AuthorityRepository auth) {
+	public static User createUser(DTOUser dtouser,String userlog,PasswordEncoder passwordEncoder,AuthorityRepository auth) {
 		User user = new User();
-		log.info("Creazione oggetto User");
+		if(dtouser.getId()!=null) {
+			user.setId(dtouser.getId());
+		}
 	    user.setUsername(dtouser.getUsername());
 	    String encodedPassword = passwordEncoder.encode(dtouser.getPassword());
 	    user.setPassword(encodedPassword);
@@ -36,7 +36,7 @@ public class DTOUserFactory {
 	    Authority authorityUser = auth.findByName("ROLE_USER");
 	    List<Authority> authorities = Arrays.asList(new Authority[] {authorityUser});
 	    user.setAuthorities(authorities); 
-	    log.info("Oggetto User creato con successo");
+	    user.setLastModifiedBy(userlog);
 	    return user;
 	 
 	}

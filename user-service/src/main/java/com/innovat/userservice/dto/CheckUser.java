@@ -26,5 +26,7 @@ public class CheckUser {
         this.authorities = authorities;
         this.enabled = enabled;
     }
+    
+    public CheckUser(String username) {this.username=username;}
 }
 

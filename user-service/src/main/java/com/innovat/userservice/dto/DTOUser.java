@@ -10,6 +10,8 @@ import lombok.ToString;
 @ToString
 public class DTOUser {
 
+	private Long id;
+	
 	@NotNull(message="{NotNull.User.username.Validation}")
     @Size(min = 4, max = 50, message="{Size.User.username.Validation}")
 	private String username;

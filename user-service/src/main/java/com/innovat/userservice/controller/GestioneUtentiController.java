@@ -12,12 +12,9 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,11 +24,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.innovat.userservice.Exception.BindingException;
 import com.innovat.userservice.Exception.DuplicateException;
 import com.innovat.userservice.Exception.NotFoundException;
+import com.innovat.userservice.dto.CheckUser;
 import com.innovat.userservice.dto.CheckUserFactory;
 import com.innovat.userservice.dto.DTOUser;
-import com.innovat.userservice.dto.DTOUserFactory;
 import com.innovat.userservice.model.User;
-import com.innovat.userservice.repository.AuthorityRepository;
 import com.innovat.userservice.service.UserService;
 
 import io.swagger.annotations.Api;
@@ -46,12 +42,6 @@ import lombok.extern.java.Log;
 @Api(value="userservice", tags="Controller operazioni di gestione dati utenti")
 @Log
 public class GestioneUtentiController {
-
-	@Autowired
-    private PasswordEncoder passwordEncoder;
-	
-	@Autowired
-    private AuthorityRepository auth;
 	
 	@Autowired
     private UserService service;
@@ -132,6 +122,7 @@ public class GestioneUtentiController {
 		log.info("===========================Start userservice/registration/=="+dtouser.toString()+"=============================");
 		CustomResponse<?> res = new CustomResponse<>();
 		
+		CheckUser userLogged = (CheckUser) request.getAttribute("userLogged");
 		//Input validation
 		if(bindingResult.hasErrors()) {
 			String error = msg.getMessage(bindingResult.getFieldError(), LocaleContextHolder.getLocale());			
@@ -145,9 +136,8 @@ public class GestioneUtentiController {
 	    }
 		
 		log.info("start registrazione utente");
-		User user = DTOUserFactory.createUser(dtouser,passwordEncoder,auth);
-    	user.setEnabled(false);
-    	service.register(user); 
+		
+    	service.register(dtouser,userLogged); 
 		res.setCod(HttpStatus.CREATED.value());
 		res.setMsg(msg.getMessage("registration.success", null, LocaleContextHolder.getLocale()));
     	
@@ -202,7 +192,7 @@ public class GestioneUtentiController {
 	@RequestMapping(value = "${gestioneUtenti.save}", method = RequestMethod.POST)
 	public ResponseEntity<?> save(@ApiParam("Dati registrazione utente") @Valid @RequestBody DTOUser dtouser,BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws  BindingException, DuplicateException {
 		log.info("===========================Start userservice/save/=="+dtouser.toString()+"=============================");
-		
+		CheckUser userLogged = (CheckUser) request.getAttribute("userLogged");
 		CustomResponse<?> res = new CustomResponse<>();
 		//Input validation
 		if(bindingResult.hasErrors()) {
@@ -217,8 +207,8 @@ public class GestioneUtentiController {
 	    }
 		
 		log.info("start registrazione utente");
-		User user = DTOUserFactory.createUser(dtouser,passwordEncoder,auth);
-    	service.save(user); 
+		
+    	service.save(dtouser,userLogged); 
 		res.setCod(HttpStatus.CREATED.value());
 		res.setMsg(msg.getMessage("save.success", null, LocaleContextHolder.getLocale()));
     	
@@ -240,9 +230,9 @@ public class GestioneUtentiController {
 	    @ApiResponse(code = 401, message = "Non sei AUTENTICATO")
 	})
     @RequestMapping(value = "${gestioneUtenti.update}", method = RequestMethod.POST)
-    public ResponseEntity<?> update(@ApiParam("Dati utente") @Valid @RequestBody User user,BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws NotFoundException, BindingException {
-    	log.info("===========================Start userservice/update/=="+user.toString()+"=============================");
-    	
+    public ResponseEntity<?> update(@ApiParam("Dati utente") @Valid @RequestBody DTOUser dtouser,BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws NotFoundException, BindingException {
+    	log.info("===========================Start userservice/update/=="+dtouser.toString()+"=============================");
+    	CheckUser userLogged = (CheckUser) request.getAttribute("userLogged");
     	CustomResponse<?> res = new CustomResponse<>();
 		//Input validation
 		if(bindingResult.hasErrors()) {
@@ -251,13 +241,13 @@ public class GestioneUtentiController {
 			throw new BindingException(error);
 		}
     	
-    	if(!service.isExist(user.getId())) {
+    	if(!service.isExist(dtouser.getId())) {
     		String errMsg = "Utente inesistente";
     		log.warning(errMsg);
     		throw new NotFoundException(errMsg);
     	}
     	
-    	service.save(user); 
+    	service.save(dtouser,userLogged); 
     	res.setCod(HttpStatus.CREATED.value());
     	res.setMsg("Utente modificato con successo");
 		return ResponseEntity.ok(res);
