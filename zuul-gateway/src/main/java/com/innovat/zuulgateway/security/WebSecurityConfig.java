@@ -34,7 +34,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	String[] urlAdmin = {};
 	String[] urlUser = {"/api/auth/logout","/api/auth/refresh"};
-	String[] urlPublic = {"/api/auth/signin","/api/guestUser/userservice/registration","/api/guestUser/userservice/verify/*","/api/guestUser/userservice/checkAuth/*"};
+	String[] urlPublic = {
+			"/api/auth/signin",
+			"/api/guestUser/userservice/registration",
+			"/api/guestUser/userservice/verify/*",
+			"/api/guestUser/userservice/checkAuth/*",
+			"/api/guestUser/userservice/search/*"};
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;

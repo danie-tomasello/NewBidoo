@@ -9,6 +9,10 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,8 +27,9 @@ import com.innovat.userservice.repository.UserRepository;
 
 import lombok.extern.java.Log;
 
-@Service
 @Log
+@Service
+@CacheConfig(cacheNames= {"user"})
 public class UserServiceImpl implements UserService {	
      
      
@@ -41,8 +46,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository repo;
     
-   
+   @Cacheable(value="user", key = "#username", sync = true)
     public User loadUserByUsername(String username) {
+	   System.out.println("metodo non cachato");
     	return repo.findByUsername(username);
     }
     
@@ -98,16 +104,22 @@ public class UserServiceImpl implements UserService {
         log.info("=====================fine register================");
     }
 
+    @Cacheable
 	public List<User> getAll() {
 		// TODO Auto-generated method stub
+    	System.out.println("metodo non cachato");
 		return repo.findAll();
 	}
-	
+	@Cacheable
 	public boolean isExist(Long id) {
 		// TODO Auto-generated method stub
 		return repo.existsById(id);
 	}
 
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "user", allEntries = true),
+			@CacheEvict(cacheNames = "user", key = "#user.username")
+	})
 	public boolean save(DTOUser dtouser,CheckUser userLogged) {
 		// TODO Auto-generated method stub
 		User user = DTOUserFactory.createUser(dtouser,userLogged.getUsername(),passwordEncoder,auth);
@@ -115,6 +127,10 @@ public class UserServiceImpl implements UserService {
 		return repo.findByUsername(user.getUsername())!=null;
 	}
 
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "user", allEntries = true),
+			@CacheEvict(cacheNames = "user", key = "#user.username")
+	})
 	public boolean delete(Long id) {
 		// TODO Auto-generated method stub
 		repo.deleteById(id);

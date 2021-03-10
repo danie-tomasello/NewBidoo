@@ -1,4 +1,5 @@
 package com.innovat.userservice.model;
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -17,9 +18,14 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "AUTHORITIES")
-public class Authority {
+public class Authority implements Serializable {
 
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5815946603279238962L;
+
+	@Id
     @Column(name = "ID",length = 50, unique = true)
     @GeneratedValue
     private Long id;
