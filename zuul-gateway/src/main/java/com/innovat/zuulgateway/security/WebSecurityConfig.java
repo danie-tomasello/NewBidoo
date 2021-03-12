@@ -39,7 +39,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			"/api/guestUser/userservice/registration",
 			"/api/guestUser/userservice/verify/*",
 			"/api/guestUser/userservice/checkAuth/*",
-			"/api/guestUser/userservice/search/*"};
+			"/api/guestUser/userservice/search/*",
+			"/api/guestUser/actuator/**",
+			"/actuator/**"};
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
