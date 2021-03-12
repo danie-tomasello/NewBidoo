@@ -34,7 +34,7 @@ public class Authority implements Serializable {
     @NotNull
     private String name;
 
-    @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "authorities", fetch = FetchType.EAGER)
     @JsonBackReference
     private List<User> users;
 
