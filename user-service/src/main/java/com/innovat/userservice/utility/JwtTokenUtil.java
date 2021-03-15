@@ -26,18 +26,6 @@ public class JwtTokenUtil implements Serializable {
     static private String secret;
 
 
-
-    static public String getUsernameFromToken(String token) {
-        String username;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            username = claims.getSubject();
-        } catch (Exception e) {
-            username = null;
-        }
-        return username;
-    }
-
     static public CheckUser getUserDetails(String token) {
 
         if(token == null){

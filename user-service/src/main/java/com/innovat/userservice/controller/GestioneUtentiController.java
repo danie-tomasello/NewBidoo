@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpStatus;
@@ -29,6 +30,7 @@ import com.innovat.userservice.dto.CheckUserFactory;
 import com.innovat.userservice.dto.DTOUser;
 import com.innovat.userservice.model.User;
 import com.innovat.userservice.service.UserService;
+import com.innovat.userservice.utility.JwtTokenUtil;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -48,6 +50,9 @@ public class GestioneUtentiController {
 	
 	@Autowired
 	private ResourceBundleMessageSource msg;
+	
+	@Value("${jwt.header}")
+    private String tokenHeader;
 	
 	
 	
@@ -121,8 +126,7 @@ public class GestioneUtentiController {
     public ResponseEntity<?> createUser(@ApiParam("Dati registrazione utente") @Valid @RequestBody DTOUser dtouser,BindingResult bindingResult,HttpServletRequest request) throws UnsupportedEncodingException, MessagingException, BindingException, DuplicateException {
 		log.info("===========================Start userservice/registration/=="+dtouser.toString()+"=============================");
 		CustomResponse<?> res = new CustomResponse<>();
-		
-		CheckUser userLogged = (CheckUser) request.getAttribute("userLogged");
+		CheckUser userlogged = JwtTokenUtil.getUserDetails(request.getHeader(tokenHeader));
 		//Input validation
 		if(bindingResult.hasErrors()) {
 			String error = msg.getMessage(bindingResult.getFieldError(), LocaleContextHolder.getLocale());			
@@ -137,7 +141,7 @@ public class GestioneUtentiController {
 		
 		log.info("start registrazione utente");
 		
-    	service.register(dtouser,userLogged); 
+    	service.register(dtouser,userlogged.getUsername()); 
 		res.setCod(HttpStatus.CREATED.value());
 		res.setMsg(msg.getMessage("registration.success", null, LocaleContextHolder.getLocale()));
     	
@@ -192,7 +196,8 @@ public class GestioneUtentiController {
 	@RequestMapping(value = "${gestioneUtenti.save}", method = RequestMethod.POST)
 	public ResponseEntity<?> save(@ApiParam("Dati registrazione utente") @Valid @RequestBody DTOUser dtouser,BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws  BindingException, DuplicateException {
 		log.info("===========================Start userservice/save/=="+dtouser.toString()+"=============================");
-		CheckUser userLogged = (CheckUser) request.getAttribute("userLogged");
+		
+		CheckUser userlogged = JwtTokenUtil.getUserDetails(request.getHeader(tokenHeader));		
 		CustomResponse<?> res = new CustomResponse<>();
 		//Input validation
 		if(bindingResult.hasErrors()) {
@@ -208,7 +213,7 @@ public class GestioneUtentiController {
 		
 		log.info("start registrazione utente");
 		
-    	service.save(dtouser,userLogged); 
+    	service.save(dtouser, userlogged.getUsername()); 
 		res.setCod(HttpStatus.CREATED.value());
 		res.setMsg(msg.getMessage("save.success", null, LocaleContextHolder.getLocale()));
     	
@@ -232,7 +237,7 @@ public class GestioneUtentiController {
     @RequestMapping(value = "${gestioneUtenti.update}", method = RequestMethod.POST)
     public ResponseEntity<?> update(@ApiParam("Dati utente") @Valid @RequestBody DTOUser dtouser,BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws NotFoundException, BindingException {
     	log.info("===========================Start userservice/update/=="+dtouser.toString()+"=============================");
-    	CheckUser userLogged = (CheckUser) request.getAttribute("userLogged");
+    	CheckUser userlogged = JwtTokenUtil.getUserDetails(request.getHeader(tokenHeader));	
     	CustomResponse<?> res = new CustomResponse<>();
 		//Input validation
 		if(bindingResult.hasErrors()) {
@@ -247,7 +252,7 @@ public class GestioneUtentiController {
     		throw new NotFoundException(errMsg);
     	}
     	
-    	service.save(dtouser,userLogged); 
+    	service.save(dtouser,userlogged.getUsername()); 
     	res.setCod(HttpStatus.CREATED.value());
     	res.setMsg("Utente modificato con successo");
 		return ResponseEntity.ok(res);

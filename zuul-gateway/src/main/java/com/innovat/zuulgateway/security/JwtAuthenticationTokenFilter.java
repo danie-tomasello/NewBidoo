@@ -2,10 +2,12 @@ package com.innovat.zuulgateway.security;
 
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -14,15 +16,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
 
-    @Autowired
-    private UserDetailsService userDetailsService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -37,9 +36,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     	String authToken = request.getHeader(tokenHeader);
         
         UserDetails userDetails = null;
-
+        
         if(authToken != null){
-            userDetails = jwtTokenUtil.getUserDetails(authToken);
+            userDetails = jwtTokenUtil.getUserDetails(authToken);           
         }
 
         if (userDetails != null && SecurityContextHolder.getContext().getAuthentication() == null) {
