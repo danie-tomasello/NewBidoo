@@ -7,12 +7,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.innovat.authJwt.security.client.User;
+import com.innovat.authJwt.security.client.DTOUser;
 import com.innovat.authJwt.security.client.UserClient;
 
+import lombok.extern.java.Log;
+
+@Log
 @Service
 public class JwtUserDetailsServiceImpl implements UserDetailsService {
  
+	//private static final Logger logger = LoggerFactory.getLogger(CustomerUserDetailsService.class);
+	
 	@Autowired
 	private UserClient userClient;
 	
@@ -23,11 +28,14 @@ public class JwtUserDetailsServiceImpl implements UserDetailsService {
     
     private JwtUser getHttpValue(String userId){
     	
-    	User user=null;
-    	
+    	DTOUser user=null;
+    	try {
     		
-    		user=userClient.getByUsername(userId);    		
-    	   	    	
+    		user=userClient.getByUsername(userId);    	
+    		log.info(this.getClass().getSimpleName()+" "+user.toString());
+    	}catch(Exception e) {
+    		e.printStackTrace();
+    	}    	    	
     	
     	if (user == null) {
             throw new UsernameNotFoundException(String.format("No user found with username '%s'.", userId));            

@@ -1,20 +1,21 @@
-package com.innovat.zuulgateway.security.client;
+package com.innovat.userservice.utility;
 
 import java.util.List;
 
 import lombok.Data;
-import lombok.ToString;
 
+/**
+ * Created by stephan on 20.03.16.
+ */
 @Data
-@ToString
-public class User {
+public class JwtUser {
 
     private String username;
     private String password;
     private List<String> authorities;
     private boolean enabled;
 
-    public User(
+    public JwtUser(
             String username,
             String password, 
             List<String> authorities,
@@ -25,5 +26,7 @@ public class User {
         this.authorities = authorities;
         this.enabled = enabled;
     }
+    
+    public JwtUser(String username) {this.username=username;}
 }
 

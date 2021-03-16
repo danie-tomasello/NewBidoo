@@ -1,4 +1,4 @@
-package com.innovat.userservice.dto;
+package com.innovat.registrationservice.dto;
 
 import java.util.List;
 

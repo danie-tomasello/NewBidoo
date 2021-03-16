@@ -38,7 +38,7 @@ public class Auditable<U> implements Serializable
     @Column(name = "last_modified_by")
     private U lastModifiedBy;
     
-    @Column(name = "VERIFICATION_CODE", length = 64)    
+    @Column(name = "VERIFICATION_CODE", length = 64, unique=true)    
     private String verification;
     
     public void setLastModifiedBy(U username) {

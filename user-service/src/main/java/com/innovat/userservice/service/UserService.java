@@ -1,9 +1,6 @@
 package com.innovat.userservice.service;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
-
-import javax.mail.MessagingException;
 
 import com.innovat.userservice.dto.DTOUser;
 import com.innovat.userservice.model.User;
@@ -15,13 +12,11 @@ public interface UserService {
 	
 	public User loadUserByUsername(String username);
 	
-	public void register(DTOUser user, String userLogged) throws UnsupportedEncodingException, MessagingException;
+	public void save(DTOUser user, String userLogged);
 	
-	public boolean verify(String verificationCode);
+	public void update(DTOUser user, String userLogged);
 	
-	public boolean save(DTOUser user, String userLogged);
-	
-	public boolean delete(Long id);
+	public void delete(Long id);
 	
 	public boolean isExist(Long id);
 

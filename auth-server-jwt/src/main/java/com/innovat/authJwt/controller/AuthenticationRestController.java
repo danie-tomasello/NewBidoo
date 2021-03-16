@@ -25,6 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.innovat.authJwt.security.JwtTokenUtil;
 
+import lombok.extern.java.Log;
+
+@Log
 @RestController
 @RequestMapping(value = "${sicurezza.uri}")
 public class AuthenticationRestController {
@@ -46,7 +49,7 @@ public class AuthenticationRestController {
     @RequestMapping(value = "${sicurezza.signin}", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody JwtAuthenticationRequest authenticationRequest,BindingResult bindingResult, HttpServletResponse response) throws AuthenticationException, IOException {
     	
-    	
+    	log.info("===========================Start auth/signin/=="+authenticationRequest.toString()+"=============================");
     	// Effettuo l autenticazione
         final Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -70,7 +73,7 @@ public class AuthenticationRestController {
     
     @RequestMapping(value="${sicurezza.logout}",method=RequestMethod.GET)
 	public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		
+		log.info("===========================Start auth/logout/===============================");
 		
 		HttpSession session= request.getSession(false);
 	    SecurityContextHolder.clearContext();
@@ -84,7 +87,9 @@ public class AuthenticationRestController {
     
     @RequestMapping(value = "${sicurezza.refresh}", method = RequestMethod.GET)
     public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) {
-    	String token=request.getHeader("X-Auth");
+    	log.info("===========================Start auth/refresh/===============================");
+    	
+    	String token=request.getHeader(tokenHeader);
     	
         UserDetails userDetails =
                 (UserDetails)SecurityContextHolder.getContext().getAuthentication().getPrincipal();

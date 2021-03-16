@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 
-import com.innovat.userservice.dto.CheckUser;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
@@ -26,10 +24,10 @@ public class JwtTokenUtil implements Serializable {
     static private String secret;
 
 
-    static public CheckUser getUserDetails(String token) {
+    static public JwtUser getUserDetails(String token) {
 
         if(token == null){
-            return null;
+            return new JwtUser("anonymous");
         }
         try {
             final Claims claims = getClaimsFromToken(token);
@@ -38,7 +36,7 @@ public class JwtTokenUtil implements Serializable {
                 authorities = (List<String>) claims.get(CLAIM_KEY_AUTHORITIES);
             }
 
-            return new CheckUser(
+            return new JwtUser(
                     claims.getSubject(),
                     "",
                     authorities,

@@ -32,16 +32,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	String[] urlAdmin = {};
-	String[] urlUser = {"/api/auth/logout","/api/auth/refresh"};
+	String[] urlAdmin = {
+			"/api/guestUser/service/save",
+			"/api/guestUser/service/delete",
+			"/api/guestUser/search/*",
+			"/api/guestUser/service/update"
+	};
+	String[] urlUser = {
+			"/api/auth/logout",
+			"/api/auth/refresh"
+	};
+	
 	String[] urlPublic = {
 			"/api/auth/signin",
-			"/api/guestUser/userservice/registration",
-			"/api/guestUser/userservice/verify/*",
-			"/api/guestUser/userservice/checkAuth/*",
-			"/api/guestUser/userservice/search/*",
+			"/api/registration/service/emailsend",
+			"/api/registration/service/verify",
 			"/api/guestUser/actuator/**",
-			"/actuator/**"};
+			"/actuator/**"
+	};
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;

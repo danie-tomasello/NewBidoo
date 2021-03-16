@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import com.innovat.authJwt.security.client.User;
+import com.innovat.authJwt.security.client.DTOUser;
 
 
 public final class JwtUserFactory {
@@ -13,12 +13,12 @@ public final class JwtUserFactory {
     private JwtUserFactory() {
     }
 
-    public static JwtUser create(User user) {
+    public static JwtUser create(DTOUser user) {
         return new JwtUser(
                 user.getUsername(),
                 user.getPassword(),
                 mapToGrantedAuthorities(user.getAuthorities()),
-                user.isEnabled()
+                user.getEnabled()
         );
     }
 
