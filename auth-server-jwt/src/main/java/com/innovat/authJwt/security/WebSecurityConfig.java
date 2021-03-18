@@ -29,9 +29,10 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	private final String[] matcher_user = {"/auth/logout","/auth/refresh",};
 	
-	private final String[] matcher_anonymous = {"/auth/signin"};
+	private final String[] matcher_user = {"/auth/logout"};
+	
+	private final String[] matcher_anonymous = {"/auth/signin","/actuator/**"};
 
     @Autowired
     private JwtAuthenticationEntryPoint unauthorizedHandler;
@@ -90,8 +91,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(matcher_user)
-                .hasAuthority("ROLE_USER")
+                .antMatchers(matcher_user).hasAuthority("ROLE_USER")
                 .antMatchers(matcher_anonymous).permitAll()
                 .anyRequest().authenticated();
 

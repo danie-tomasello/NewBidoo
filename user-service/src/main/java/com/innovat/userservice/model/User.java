@@ -1,6 +1,5 @@
 package com.innovat.userservice.model;
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -12,27 +11,22 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.springframework.data.annotation.CreatedDate;
-
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 
 
 @Data
+@EqualsAndHashCode(callSuper=false)
 @Entity
 @Table(name = "USERS")
 @ToString
-public class User implements Serializable{
-
-
-    
-    /**
+public class User extends Auditable<String> implements Serializable{
+   /**
 	 * 
 	 */
 	private static final long serialVersionUID = -3518018508482697232L;
@@ -40,7 +34,7 @@ public class User implements Serializable{
 	@Id 
 	@GeneratedValue
 	@Column(name = "USERID", length = 50, unique = true)
-	private long id;
+	private Long id;
 	
 	@Column(name = "USERNAME", length = 50, unique = true)
     @NotNull(message="{NotNull.User.username.Validation}")
@@ -65,22 +59,12 @@ public class User implements Serializable{
     @NotNull(message="{NotNull.User.phoneNumber.Validation}")
     @Size(min = 4, max = 15, message="{Size.User.phoneNumber.Validation}")
     private String phoneNumber;
-    
-    @Column(name = "VERIFICATION_CODE", length = 64)    
-    private String verification;
-    
-    @Temporal(TemporalType.DATE)
-    @Column(name = "CREATION_DATE")
-    private Date dataCreaz;
-    
-    @CreatedDate
-    @Column(name = "created_date", nullable = false, updatable = false)
-    private Date createdAt;
+      
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "USERS_AUTHORITIES",
-            joinColumns = {@JoinColumn(name = "USER_USERNAME", referencedColumnName = "USERNAME")},
+            joinColumns = {@JoinColumn(name = "USER_ID", referencedColumnName = "USERID")},
             inverseJoinColumns = {@JoinColumn(name = "AUTHORITY_ID", referencedColumnName = "ID")})
     private List<Authority> authorities;
 

@@ -8,8 +8,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-
-import com.innovat.zuulgateway.security.client.User;
+import com.innovat.zuulgateway.security.client.DTOUser;
 import com.innovat.zuulgateway.security.client.UserClient;
 
 @Service
@@ -27,7 +26,7 @@ public class CustomerUserDetailsService implements UserDetailsService{
     
     private JwtUser getHttpValue(String userId){
     	
-    	User user=null;
+    	DTOUser user=null;
     	try {
     		
     		user=userClient.getByUsername(userId);    		

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @FeignClient(name="user-service")
 public interface UserClient {
 	
-	@RequestMapping(value = "/userservice/checkAuth/{username}", method = RequestMethod.POST)
-    public User getByUsername(@PathVariable (value="username") String username);
+	@RequestMapping(value = "/search/{username}", method = RequestMethod.GET)
+    public DTOUser getByUsername(@PathVariable (value="username") String username);
 
 }

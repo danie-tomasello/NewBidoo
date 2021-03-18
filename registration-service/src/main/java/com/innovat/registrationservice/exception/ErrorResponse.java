@@ -1,15 +1,14 @@
-package com.innovat.userservice.controller;
+package com.innovat.registrationservice.exception;
 
 import java.util.Date;
 
 import lombok.Data;
 
 @Data
-public class CustomResponse<k> {
+public class ErrorResponse {
 	
 	private Date data = new Date();
 	private int cod;
 	private String msg;
-	private k object;
 
 }

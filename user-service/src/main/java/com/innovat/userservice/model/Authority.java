@@ -1,10 +1,9 @@
 package com.innovat.userservice.model;
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -19,9 +18,14 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "AUTHORITIES")
-public class Authority {
+public class Authority implements Serializable {
 
-    @Id
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5815946603279238962L;
+
+	@Id
     @Column(name = "ID",length = 50, unique = true)
     @GeneratedValue
     private Long id;
@@ -30,7 +34,7 @@ public class Authority {
     @NotNull
     private String name;
 
-    @ManyToMany(mappedBy = "authorities", fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "authorities", fetch = FetchType.EAGER)
     @JsonBackReference
     private List<User> users;
 

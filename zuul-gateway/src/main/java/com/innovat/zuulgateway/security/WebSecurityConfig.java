@@ -4,7 +4,6 @@ package com.innovat.zuulgateway.security;
 
 import java.util.Arrays;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,15 +24,13 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
 
-
-
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
 	String[] urlAdmin = {};
-	String[] urlUser = {"/api/auth/logout","/api/auth/refresh"};
+	String[] urlUser = {"/api/auth/logout"};
 	String[] urlPublic = {"/api/auth/signin","/api/guestUser/userservice/registration","/api/guestUser/userservice/verify/*","/api/guestUser/userservice/checkAuth/*"};
 
     @Autowired
@@ -76,7 +73,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         configuration.addAllowedOrigin("http://localhost:4200");
         configuration.setAllowedMethods(Arrays.asList("POST, PUT, GET, OPTIONS, DELETE"));
         configuration.addAllowedHeader("*");
-        configuration.setExposedHeaders(Arrays.asList("header1","header2","X-Auth"));
+        configuration.setExposedHeaders(Arrays.asList("header1","header2","X-Auth","X-Refresh"));
         configuration.addAllowedMethod("*");
         configuration.setAllowCredentials(false);        
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

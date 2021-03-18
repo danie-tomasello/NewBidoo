@@ -2,111 +2,113 @@ package com.innovat.userservice.service;
 
 
 
-import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
+import com.innovat.userservice.dto.DTOUser;
+import com.innovat.userservice.dto.DTOUserFactory;
+import com.innovat.userservice.model.Authority;
 import com.innovat.userservice.model.User;
+import com.innovat.userservice.repository.AuthorityRepository;
 import com.innovat.userservice.repository.UserRepository;
 
 import lombok.extern.java.Log;
 
-@Service
 @Log
+@Service
+@CacheConfig(cacheNames= {"user"})
 public class UserServiceImpl implements UserService {	
      
-     
-    @Autowired
-    private JavaMailSender mailSender;
-    
+	@Autowired
+    private AuthorityRepository auth; 	    
     
     @Autowired
     private UserRepository repo;
     
    
+    
+   @Cacheable(value="user", key = "#username", sync = true)
     public User loadUserByUsername(String username) {
-    	return repo.findByUsername(username);
-    }
-    
-    public void register(User user) throws UnsupportedEncodingException, MessagingException {
-    	log.info("=====================start register================");
-        repo.save(user);
-        sendVerificationEmail(user);
-    }
-    
-    public boolean verify(String verificationCode) {
-        User user = repo.findByVerification(verificationCode);
-         
-        if (user == null || user.getEnabled()) {
-            return false;
-        } else {
-            user.setVerification(null);
-            user.setEnabled(true);
-            repo.save(user);
-             
-            return true;
-        }
-         
-    }
-     
-    private void sendVerificationEmail(User user) throws UnsupportedEncodingException, MessagingException {
-    	String toAddress = user.getEmail();
-        String fromAddress = "danieletomasello.innovat@gmail.com";
-        String senderName = "Innovat";
-        String subject = "Please verify your registration";
-        String content = "Dear [[name]],<br>"
-                + "Please click the link below to verify your registration:<br>"
-                + "<h3><a href=\"[[URL]]\" target=\"_self\">VERIFY</a></h3>"
-                + "Thank you,<br>"
-                + "Innovat.";
-         
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message);
-         
-        helper.setFrom(fromAddress, senderName);
-        helper.setTo(toAddress);
-        helper.setSubject(subject);
-         
-        content = content.replace("[[name]]", user.getUsername());
-        String verifyURL ="http://localhost:4200/verify/" + user.getVerification();
-         
-        content = content.replace("[[URL]]", verifyURL);
-         
-        helper.setText(content, true);
-         
-        mailSender.send(message);
-        log.info("=====================fine register================");
+	   log.info("richiesta non cachata");
+	   return repo.findByUsername(username);
     }
 
+    @Cacheable
 	public List<User> getAll() {
 		// TODO Auto-generated method stub
+    	log.info("richiesta non cachata");
 		return repo.findAll();
 	}
 	
+    @Cacheable(value="user", key = "#id", sync = true)
 	public boolean isExist(Long id) {
 		// TODO Auto-generated method stub
+		log.info("richiesta non cachata");
 		return repo.existsById(id);
 	}
 
-	public boolean save(User user) {
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "users", allEntries = true),
+			@CacheEvict(cacheNames = "user", key = "#dtouser.username")
+	})
+	public void save(DTOUser dtouser,String userLogged) {
 		// TODO Auto-generated method stub
+		User user = DTOUserFactory.createUser(dtouser,userLogged);
 		
+		Authority authorityUser = auth.findByName("ROLE_USER");
+	    List<Authority> authorities = Arrays.asList(new Authority[] {authorityUser});
+	    user.setAuthorities(authorities);
+	    
     	repo.save(user);
-		return repo.findByUsername(user.getUsername())!=null;
 	}
 
-	public boolean delete(Long id) {
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "users", allEntries = true),
+			@CacheEvict(cacheNames = "user", key = "#id")
+	})
+	public void delete(Long id) {
 		// TODO Auto-generated method stub
 		repo.deleteById(id);
-		return repo.existsById(id);
 	}
+
+	@Caching(evict = {
+			@CacheEvict(cacheNames = "users", allEntries = true),
+			@CacheEvict(cacheNames = "user", key = "#dtouser.username")
+	})
+	@Override
+	public void update(DTOUser dtouser, String userLogged) {
+		// TODO Auto-generated method stub
+		
+		User user = DTOUserFactory.createUser(dtouser,userLogged);
+		List<Authority> authlist = new ArrayList<>();
+		Map<String,Authority> mapAuth = mapListAuth(auth.findAll());
+		
+		for(String auth : dtouser.getAuthorities()) {
+			if(mapAuth.containsKey(auth)) {
+				authlist.add(mapAuth.get(auth));
+			}
+		}
+		user.setAuthorities(authlist);
+		repo.save(user);
+	}
+	
+	private Map<String,Authority> mapListAuth(List<Authority> authorities) {
+		Map<String,Authority> res = new HashMap<>();
+        for(Authority authority : authorities) {
+        	res.put(authority.getName(), authority);
+        }
+        return res;
+    }
 
         
 }

@@ -1,0 +1,14 @@
+#Microservice config
+spring:
+  application:
+    name: zuul-gateway 
+  profiles:
+    active: config 
+
+server:
+  port: 9090
+  tomcat:
+    threads:
+      max: 5
+
+  

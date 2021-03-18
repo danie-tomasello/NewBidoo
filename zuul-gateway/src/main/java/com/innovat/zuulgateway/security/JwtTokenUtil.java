@@ -1,24 +1,28 @@
 package com.innovat.zuulgateway.security;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 
 @Component
 public class JwtTokenUtil implements Serializable {
@@ -31,19 +35,15 @@ public class JwtTokenUtil implements Serializable {
     static final String CLAIM_KEY_AUTHORITIES = "roles";
     static final String CLAIM_KEY_IS_ENABLED = "isEnabled";
 
-    private static final String AUDIENCE_UNKNOWN = "unknown";
-    private static final String AUDIENCE_WEB = "web";
-    private static final String AUDIENCE_MOBILE = "mobile";
-    private static final String AUDIENCE_TABLET = "tablet";
 
     @Value("${jwt.secret}")
     private String secret;
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     @Value("${jwt.expiration}")
     private Long expiration;
+    
+    @Value("${jwt.refreshExpiration}")
+    private Long refreshExpiration;
 
     public String getUsernameFromToken(String token) {
         String username;
@@ -55,7 +55,7 @@ public class JwtTokenUtil implements Serializable {
         }
         return username;
     }
-    
+
     public JwtUser getUserDetails(String token) {
 
         if(token == null){
@@ -102,16 +102,6 @@ public class JwtTokenUtil implements Serializable {
         return expiration;
     }
 
-    public String getAudienceFromToken(String token) {
-        String audience;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            audience = (String) claims.get(CLAIM_KEY_AUDIENCE);
-        } catch (Exception e) {
-            audience = null;
-        }
-        return audience;
-    }
 
     private Claims getClaimsFromToken(String token) {
         Claims claims;
@@ -135,27 +125,9 @@ public class JwtTokenUtil implements Serializable {
         return expiration.before(new Date());
     }
 
-    private String generateAudience(Boolean x) {
-        String audience = AUDIENCE_UNKNOWN;
-        if (x) {
-            audience = AUDIENCE_WEB;
-        } else if (!x) {
-            audience = AUDIENCE_TABLET;
-        } else if (!x) {
-            audience = AUDIENCE_MOBILE;
-        }
-        return audience;
-    }
-
-    private Boolean ignoreTokenExpiration(String token) {
-        String audience = getAudienceFromToken(token);
-        return (AUDIENCE_TABLET.equals(audience) || AUDIENCE_MOBILE.equals(audience));
-    }
-
     public String generateToken(UserDetails userDetails) throws JsonProcessingException {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
-        claims.put(CLAIM_KEY_AUDIENCE, generateAudience(true));
         claims.put(CLAIM_KEY_CREATED, new Date());
         List<String> auth =userDetails.getAuthorities().stream().map(role-> role.getAuthority()).collect(Collectors.toList());
         claims.put(CLAIM_KEY_AUTHORITIES, auth);
@@ -164,8 +136,7 @@ public class JwtTokenUtil implements Serializable {
         return generateToken(claims);
     }
 
-    String generateToken(Map<String, Object> claims) {
-        ObjectMapper mapper = new ObjectMapper();
+    public String generateToken(Map<String, Object> claims) {
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -173,10 +144,24 @@ public class JwtTokenUtil implements Serializable {
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact();
     }
+    
+    public String createRefreshToken(String subject) {
+        if (subject==null||subject.equals("")) {
+            throw new IllegalArgumentException("Cannot create JWT Token without username");
+        }
+        Claims claims = Jwts.claims().setSubject(subject);
+        claims.put(CLAIM_KEY_AUTHORITIES, Arrays.asList("REFRESH_TOKEN"));
+        
+        return Jwts.builder()
+          .setClaims(claims)
+          .setIssuedAt(new Date(System.currentTimeMillis()))
+          .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration * 1000))
+          .signWith(SignatureAlgorithm.HS512, secret)
+        .compact();
+    }
 
     public Boolean canTokenBeRefreshed(String token) {
-        final Date created = getCreatedDateFromToken(token);
-        return  (!isTokenExpired(token) || ignoreTokenExpiration(token));
+        return  (!isTokenExpired(token));
     }
 
     public String refreshToken(String token) {
@@ -191,11 +176,29 @@ public class JwtTokenUtil implements Serializable {
         return refreshedToken;
     }
 
-    public Boolean validateToken(String token, UserDetails userDetails) {
-        JwtUser user = (JwtUser) userDetails;
-        final String username = getUsernameFromToken(token);
-        return (
-                username.equals(user.getUsername())
-                        && !isTokenExpired(token));
-    }
+    public List<SimpleGrantedAuthority> getRolesFromToken(String token) {
+		Claims claims = getClaimsFromToken(token);
+
+		 List<SimpleGrantedAuthority> authorities = null;
+         if (claims.get(CLAIM_KEY_AUTHORITIES) != null) {
+             authorities = ((List<String>) claims.get(CLAIM_KEY_AUTHORITIES)).stream().map(role-> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
+         }
+		return authorities;
+
+	}
+    
+    public boolean validateToken(String token) {
+		try {
+			final Claims claims = Jwts.parser()
+                    .setSigningKey(secret)
+                    .parseClaimsJws(token)
+                    .getBody();
+			return true;
+		} catch (SignatureException | MalformedJwtException | UnsupportedJwtException | IllegalArgumentException ex) {
+			throw new BadCredentialsException("INVALID_CREDENTIALS", ex);
+		} catch (ExpiredJwtException ex) {
+			throw ex;
+		}
+	}
+ 
 }
