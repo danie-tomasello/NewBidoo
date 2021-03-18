@@ -23,5 +23,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		
 		return new ResponseEntity<ErrorResponse>(error,new HttpHeaders(),HttpStatus.NOT_FOUND);
 	}
+	
+	@ExceptionHandler(ExpiredSessionException.class)
+	public final ResponseEntity<?> expiredSessionHandler(Exception ex){
+		
+		
+		return new ResponseEntity<>(ex.getMessage(),new HttpHeaders(),HttpStatus.NETWORK_AUTHENTICATION_REQUIRED);
+	}
 
 }

@@ -79,6 +79,18 @@
 		    <groupId>org.springframework.cloud</groupId>
 		    <artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
+		
+	<!-- SPRING CACHE -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-cache</artifactId>
+		</dependency>
+	<!-- HAZELCAST CACHE -->
+		<dependency>
+		    <groupId>com.hazelcast</groupId>
+		    <artifactId>hazelcast</artifactId>
+		    <version>4.0.2</version>
+		</dependency>
 						
 	</dependencies>	
 	

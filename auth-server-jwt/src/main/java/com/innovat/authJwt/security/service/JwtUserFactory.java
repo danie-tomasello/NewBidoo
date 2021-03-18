@@ -1,4 +1,4 @@
-package com.innovat.authJwt.security;
+package com.innovat.authJwt.security.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
