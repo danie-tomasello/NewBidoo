@@ -2,8 +2,6 @@ package com.innovat.authJwt.security;
 
 
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,10 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 
 
@@ -29,17 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	
-	
-	private final String[] matcher_user = {"/auth/logout"};
-	
-	private final String[] matcher_anonymous = {"/auth/signin","/actuator/**"};
-
-    @Autowired
-    private JwtAuthenticationEntryPoint unauthorizedHandler;
-    
-    @Autowired
-    private JwtAccessDeniedHandler accessDeniedHandler;
-
     @Autowired
     private UserDetailsService userDetailsService;
 
@@ -54,11 +37,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-    @Bean
-    public JwtAuthenticationTokenFilter authenticationTokenFilterBean() throws Exception {
-        return new JwtAuthenticationTokenFilter();
-    }
     
     @Bean
     @Override
@@ -67,36 +45,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
     
 
-   // configurazione Cors per poter consumare le api restful con richieste ajax
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.addAllowedOrigin("http://localhost:4200");
-        configuration.setAllowedMethods(Arrays.asList("POST, PUT, GET, OPTIONS, DELETE"));
-        configuration.addAllowedHeader("*");
-        configuration.addAllowedMethod("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf().disable()
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .exceptionHandling().accessDeniedHandler(accessDeniedHandler).and()
-                // non abbiamo bisogno di una sessione
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .authorizeRequests()
-                .antMatchers(matcher_user).hasAuthority("ROLE_USER")
-                .antMatchers(matcher_anonymous).permitAll()
-                .anyRequest().authenticated();
-
-        // Filtro Custom JWT
-        httpSecurity.addFilterBefore(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+                .anyRequest().permitAll();
 
         httpSecurity.headers().cacheControl();
     }

@@ -3,10 +3,15 @@ package com.innovat.authJwt.exception;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,21 +26,37 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @RestController
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 	
-	@ExceptionHandler(NotFoundException.class)
-	public final ResponseEntity<ErrorResponse> exceptionNotFoundHandler(Exception ex){
-		ErrorResponse error = new ErrorResponse();
-		error.setCod(HttpStatus.NOT_FOUND.value());
-		error.setMsg(ex.getMessage());
-		
-		return new ResponseEntity<ErrorResponse>(error,new HttpHeaders(),HttpStatus.NOT_FOUND);
-	}
-	
-	@ExceptionHandler(ExpiredSessionException.class)
-	public final ResponseEntity<Object> expiredSessionHandler(Exception ex) throws JsonProcessingException{
+	@Autowired
+	private ResourceBundleMessageSource msg;
+
+	@ExceptionHandler(BindingException.class)
+	public final ResponseEntity<?> exceptionBindingHandler(Exception ex) throws JsonProcessingException {
 		HttpHeaders headers = new HttpHeaders();
 	    headers.setContentType(MediaType.APPLICATION_JSON);
 		byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("cause", ex.getMessage()));
-		return new ResponseEntity<Object>(body,headers,HttpStatus.NOT_ACCEPTABLE);
+		return new ResponseEntity<>(body,headers,HttpStatus.BAD_REQUEST);
+	}
+	
+	@ExceptionHandler(ExpiredSessionException.class)
+	public final ResponseEntity<?> expiredSessionHandler(Exception ex) throws JsonProcessingException{
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("cause", ex.getMessage()));
+		return new ResponseEntity<>(body,headers,HttpStatus.NOT_ACCEPTABLE);
+	}
+	@ExceptionHandler(BadCredentialsException.class)
+	public final ResponseEntity<?> badCredencialsHandler(Exception ex) throws JsonProcessingException{
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("cause", msg.getMessage("badcredencials.exception",new Object[0], LocaleContextHolder.getLocale())));
+		return new ResponseEntity<>(body,headers,HttpStatus.UNAUTHORIZED);
+	}
+	@ExceptionHandler(DisabledException.class)
+	public final ResponseEntity<?> disabledHandler(Exception ex) throws JsonProcessingException{
+		HttpHeaders headers = new HttpHeaders();
+	    headers.setContentType(MediaType.APPLICATION_JSON);
+		byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("cause", msg.getMessage("disabled.exception",new Object[0], LocaleContextHolder.getLocale())));
+		return new ResponseEntity<>(body,headers,HttpStatus.UNAUTHORIZED);
 	}
 
 }

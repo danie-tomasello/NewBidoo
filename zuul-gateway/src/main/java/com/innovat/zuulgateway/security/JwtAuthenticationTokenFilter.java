@@ -40,7 +40,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         String authToken = request.getHeader(tokenHeader);
         
-        
+        System.out.println(authToken+"========================");
         UserDetails userDetails = null;
         try {
 	        if(authToken != null && jwtTokenUtil.validateToken(authToken)){

@@ -48,7 +48,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
 		}
 		if(authException instanceof BadCredentialsException) {
 			log.info("================= BadCredentialsException eccezione ==================");
-			message = "Username e/o password errate.";
+			message = "Il token utilizzato non è valido.";
 		}
 		if(authException instanceof DisabledException) {
 			log.info("================= DisabledException exception ==================");

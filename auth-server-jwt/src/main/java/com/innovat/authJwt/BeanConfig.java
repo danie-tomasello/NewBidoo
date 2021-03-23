@@ -1,5 +1,7 @@
 package com.innovat.authJwt;
 
+import java.util.Map;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,7 +12,7 @@ import com.hazelcast.core.HazelcastInstance;
 public class BeanConfig {
 
 	@Bean
-	public HazelcastInstance getHazelcast() {
-		return Hazelcast.newHazelcastInstance();
+	public Map<String, String> getSessionMap() {
+		return Hazelcast.newHazelcastInstance().getMap("tokenMap");
 	}
 }
