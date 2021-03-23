@@ -61,7 +61,7 @@ public class GestioneUtentiController {
 		      produces = "application/json")
 	@ApiResponses(value =
 	{   @ApiResponse(code = 201, message = "L'utente è stato creato con successo"),
-	    @ApiResponse(code = 406, message = "Questo utente esiste già"),
+	    @ApiResponse(code = 400, message = "Questo utente esiste già"),
 	    @ApiResponse(code = 403, message = "Non sei AUTORIZZATO ad accedere alle informazioni"),
 	    @ApiResponse(code = 401, message = "Non sei AUTENTICATO")
 	})
@@ -105,7 +105,6 @@ public class GestioneUtentiController {
 		      produces = "application/json")
 	@ApiResponses(value =
 	{   @ApiResponse(code = 201, message = "L'utente è stato modificato con successo"),
-	    @ApiResponse(code = 406, message = "Questo utente esiste già"),
 	    @ApiResponse(code = 403, message = "Non sei AUTORIZZATO ad accedere alle informazioni"),
 	    @ApiResponse(code = 401, message = "Non sei AUTENTICATO")
 	})
@@ -145,7 +144,6 @@ public class GestioneUtentiController {
 		      produces = "application/json")
 	@ApiResponses(value =
 	{   @ApiResponse(code = 201, message = "L'utente è stato eliminato con successo"),
-	    @ApiResponse(code = 406, message = "Questo utente non esiste"),
 	    @ApiResponse(code = 403, message = "Non sei AUTORIZZATO ad accedere alle informazioni"),
 	    @ApiResponse(code = 401, message = "Non sei AUTENTICATO")
 	})

@@ -39,7 +39,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 		error.setCod(HttpStatus.NOT_ACCEPTABLE.value());
 		error.setMsg(ex.getMessage());
 		
-		return new ResponseEntity<ErrorResponse>(error,new HttpHeaders(),HttpStatus.NOT_ACCEPTABLE);
+		return new ResponseEntity<ErrorResponse>(error,new HttpHeaders(),HttpStatus.BAD_REQUEST);
 	}
 	
 }
