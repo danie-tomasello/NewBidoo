@@ -58,11 +58,10 @@ public class AuthenticationRestController {
     
 
     @RequestMapping(value = "${sicurezza.signin}", method = RequestMethod.POST)
-    public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody JwtAuthenticationRequest authenticationRequest,BindingResult bindingResult, HttpServletResponse response) throws Exception {
+    public ResponseEntity<?> createAuthenticationToken(@Valid @RequestBody JwtAuthenticationRequest authenticationRequest,BindingResult bindingResult, HttpServletResponse response,HttpServletRequest request) throws Exception {
     	
     	log.info("===========================Start auth/signin/=="+authenticationRequest.toString()+"=============================");
     	// Effettuo l autenticazione
-    	try {
 	        final Authentication authentication = authenticationManager.authenticate(
 	                new UsernamePasswordAuthenticationToken(
 	                        authenticationRequest.getUsername(),
@@ -72,12 +71,6 @@ public class AuthenticationRestController {
 	        
 	        SecurityContextHolder.getContext().setAuthentication(authentication);
 	        
-	    } catch (DisabledException e) {
-			throw new Exception("USER_DISABLED", e);
-		}
-		catch (BadCredentialsException e) {
-			throw new Exception("INVALID_CREDENTIALS", e);
-		}
         
         
 
@@ -123,7 +116,7 @@ public class AuthenticationRestController {
     public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) throws ExpiredSessionException {
     	log.info("===========================Start auth/refresh/===============================");
     	
-    	DefaultClaims claims = (io.jsonwebtoken.impl.DefaultClaims) request.getAttribute("claims");
+    	DefaultClaims claims = (DefaultClaims) request.getAttribute("claims");
     	String refreshToken=request.getHeader(tokenRefreshHeader);
     	Map<String, String> tokenSessionMap = hz.getMap("tokenMap");
     	 

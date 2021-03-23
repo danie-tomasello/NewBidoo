@@ -34,13 +34,8 @@ public class JwtUserDetailsServiceImpl implements UserDetailsService {
     		user=userClient.getByUsername(userId);    	
     		log.info(this.getClass().getSimpleName()+" "+user.toString());
     	}catch(Exception e) {
-    		e.printStackTrace();
+    		throw new UsernameNotFoundException(String.format("No user found with username '%s'.", userId));
     	}    	    	
-    	
-    	if (user == null) {
-            throw new UsernameNotFoundException(String.format("No user found with username '%s'.", userId));            
-        } else {        	
-            return JwtUserFactory.create(user);
-        }
+    	return JwtUserFactory.create(user);
     }
 }

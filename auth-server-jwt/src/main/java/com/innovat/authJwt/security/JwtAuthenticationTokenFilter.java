@@ -68,19 +68,12 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 					log.info("==================il tokenRefresh è valido==============");
 					allowForRefreshToken(ex, request);
 				}
-				else {
-					request.setAttribute("exception", ex);
-				}
 			}
 			catch(ExpiredJwtException exc){
 				log.info("====================== sessione scaduta =======================");
 				request.setAttribute("exception", new ExpiredSessionException());
 			}
 		}
-		 catch(BadCredentialsException ex)
-		 {
-			 request.setAttribute("exception", ex);
-		 }
 
         chain.doFilter(request, response);
     }

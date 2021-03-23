@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import com.innovat.zuulgateway.security.client.DTOUser;
 import com.innovat.zuulgateway.security.client.UserClient;
 
+import lombok.extern.java.Log;
+
+@Log
 @Service
 public class CustomerUserDetailsService implements UserDetailsService{
 	
@@ -19,7 +22,7 @@ public class CustomerUserDetailsService implements UserDetailsService{
 	@Autowired
 	private UserClient userClient;
 	
-    @Override
+	@Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     	return getHttpValue(username);
     }
@@ -29,16 +32,12 @@ public class CustomerUserDetailsService implements UserDetailsService{
     	DTOUser user=null;
     	try {
     		
-    		user=userClient.getByUsername(userId);    		
+    		user=userClient.getByUsername(userId);    	
+    		log.info(this.getClass().getSimpleName()+" "+user.toString());
     	}catch(Exception e) {
-    		e.printStackTrace();
+    		throw new UsernameNotFoundException(String.format("No user found with username '%s'.", userId));
     	}    	    	
-    	
-    	if (user == null) {
-            throw new UsernameNotFoundException(String.format("No user found with username '%s'.", userId));            
-        } else {        	
-            return JwtUserFactory.create(user);
-        }
+    	return JwtUserFactory.create(user);
     }
 
 }
