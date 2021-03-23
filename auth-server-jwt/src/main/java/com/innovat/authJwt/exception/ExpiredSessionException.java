@@ -7,22 +7,15 @@ public class ExpiredSessionException extends Exception {
 	 */
 	private static final long serialVersionUID = -8293626885694428335L;
 
-	private String msg = "Sessione scaduta";
+	private static String msg = "La sessione è scaduta, si prega di effettuare il login.";
 		
 		public ExpiredSessionException() {
-			super();
+			super(msg);
 		}
 		
 		public ExpiredSessionException(String msg) {
 			super(msg);
-			this.msg=msg;
 		}
 	
-		public String getMsg() {
-			return msg;
-		}
-	
-		public void setMsg(String msg) {
-			this.msg = msg;
-		}
+		
 }

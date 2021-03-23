@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -33,34 +35,30 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
 
 		Exception exception = (Exception) request.getAttribute("exception");
 
-		String message;
+		String message = authException.getMessage();
 
-		if (exception != null) {
-
+		
+		if(exception!=null) {	
 			if(exception instanceof ExpiredSessionException) {
-				
-				log.info("================= expired session exception ==================");
+				log.info("================= ExpiredSessionException exception ==================");
 				response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
-				response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+				message = "La sessione è scaduta, si prega di effettuare il login";
+				
 			}
-			byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("cause", exception.toString()));
-
-			response.getOutputStream().write(body);
-			
-			
-
-		} else {
-
-			if (authException.getCause() != null) {
-				message = authException.getCause().toString() + " " + authException.getMessage();
-			} else {
-				message = authException.getMessage();
-			}
-
-			byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("error", message));
-
-			response.getOutputStream().write(body);
 		}
+		if(authException instanceof BadCredentialsException) {
+			log.info("================= BadCredentialsException eccezione ==================");
+			message = "Il token utilizzato non è valido.";
+		}
+		if(authException instanceof DisabledException) {
+			log.info("================= DisabledException exception ==================");
+			message = "Questo utente è disabilitato, contatta un amministratore per maggiori informazioni.";
+			
+		}
+				
+		byte[] body = new ObjectMapper().writeValueAsBytes(Collections.singletonMap("cause", message));
+
+		response.getOutputStream().write(body);
     }
     
 }
