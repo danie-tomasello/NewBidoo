@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.innovat.authJwt.exception.ExpiredSessionException;
 import com.innovat.authJwt.security.service.JwtTokenUtil;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.impl.DefaultClaims;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -140,10 +141,15 @@ public class AuthenticationRestController {
     public ResponseEntity<?> refreshAndGetAuthenticationToken(HttpServletRequest request, HttpServletResponse response) throws ExpiredSessionException {
     	log.info("===========================Start auth/refresh/===============================");
     	
-    	DefaultClaims claims = (DefaultClaims) request.getAttribute("claims");
+    	DefaultClaims claims = null;
+    	String token = request.getHeader(tokenHeader);
     	String refreshToken=request.getHeader(tokenRefreshHeader);
-    	
-    	 
+    	try {
+    		jwtTokenUtil.validateToken(token);
+    	}
+    	catch (ExpiredJwtException ex){
+    		claims = (DefaultClaims) ex.getClaims();
+    	}
     	if (claims!=null) {
 	    	if(!tokenSessionMap.containsKey(claims.getSubject()) || !tokenSessionMap.containsValue(refreshToken)) {
 	    		throw new ExpiredSessionException(); 

@@ -64,11 +64,14 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 			try {
 				if (refreshToken != null && jwtTokenUtil.validateToken(refreshToken) && requestURL.contains("refresh")) {
 					log.info("==================il tokenRefresh è valido==============");
-					allowForRefreshToken(ex, request);
+					// create a UsernamePasswordAuthenticationToken with null values.
+					UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+							null, null, null);
+					SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 				}
 			}
 			catch(ExpiredJwtException exc){
-				log.info("====================== sessione scaduta =======================");
+				log.info("====================== tokenRefresh non valido sessione scaduta =======================");
 				request.setAttribute("exception", new ExpiredSessionException());
 			}
 		}
@@ -76,18 +79,4 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
     
-    private void allowForRefreshToken(ExpiredJwtException ex, HttpServletRequest request) {
-
-		// create a UsernamePasswordAuthenticationToken with null values.
-		UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-				null, null, null);
-		// After setting the Authentication in the context, we specify
-		// that the current user is authenticated. So it passes the
-		// Spring Security Configurations successfully.
-		SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-		// Set the claims so that in controller we will be using it to create
-		// new JWT
-		request.setAttribute("claims", ex.getClaims());
-
-	}
 }
